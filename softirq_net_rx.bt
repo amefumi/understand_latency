@@ -1,0 +1,12 @@
+tracepoint:irq:softirq_entry /args->vec == 3 && (cpu == 32 || cpu == 96)/ {
+    @start[tid] = nsecs;
+}
+
+tracepoint:irq:softirq_exit /args->vec == 3 && (cpu == 32 || cpu == 96)/ {
+    if (@start[tid]) {
+        $dt = nsecs - @start[tid];
+        @softirq_time_ns[tid] = sum($dt);
+        @softirq_cnt[tid]     = count();
+        delete(@start[tid]);
+    }
+}

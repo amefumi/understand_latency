@@ -1,0 +1,17 @@
+/temp
+/results
+*.log
+*.tmp
+*.bak
+*.perf
+*.folded
+*.data
+*.old
+*.o
+*.pdf
+.DS_Store
+node_modules/
+dist/
+.env
+.vscode/
+.idea/

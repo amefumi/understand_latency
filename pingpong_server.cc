@@ -176,7 +176,6 @@ void nd_pingpong(int fd, struct sockaddr_in source, int iodepth, int flow_size)
 	// setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(flag));
 	if (getpeername(fd, (struct sockaddr *)&sin, &len) == -1)
 	    perror("getsockname");
-	getcpu(&cpu, &node);
 	flag = 1;
 //	setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(int));
 	flag = 0;
@@ -213,6 +212,7 @@ void nd_pingpong(int fd, struct sockaddr_in source, int iodepth, int flow_size)
 		}
 		if(is_first == false) {
 				is_first = true;
+				getcpu(&cpu, &node);
 				clock_gettime(CLOCK_MONOTONIC, &first_time);
 				printf("%lld.%.9ld core: %d pid: %d port number: %d\n", (long long)first_time.tv_sec, first_time.tv_nsec, cpu,  pid, ntohs(sin.sin_port));
 				fflush (stdout);
@@ -468,7 +468,8 @@ void tcp_connection(int fd, struct sockaddr_in source)
  */
 void tcp_server(int port, int num_threads, int iodepth, int flow_size, int pin, int permute, int sc)
 {
-	int cpu_list[16] = {0, 32, 4, 36, 8, 40, 12, 44, 16, 48, 20, 52, 24, 56, 28, 60};
+	int cpu_list[32] = {32, 96, 33, 97, 34, 98, 35, 99, 36, 100, 37, 101, 38, 102, 39, 103, 40, 104, 41, 105, 42, 106, 43, 107, 44, 108, 45, 109, 46, 110, 47, 111};
+	// int cpu_list[16] = {0, 32, 4, 36, 8, 40, 12, 44, 16, 48, 20, 52, 24, 56, 28, 60};
 	// int cpu_list[2] = {0, 32};
 	//int cpu_list[8] = {0, 4, 8, 12, 16, 20, 24, 28};
 	int listen_fd = socket(PF_INET, SOCK_STREAM, 0);

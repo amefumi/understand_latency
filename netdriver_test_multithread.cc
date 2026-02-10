@@ -44,6 +44,7 @@
 #include <arpa/inet.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
+#include <sys/resource.h>
 #include <inttypes.h>
 #include <vector>
 #include <queue>
@@ -51,6 +52,7 @@
 #include <mutex>          // std::mutex
 #include <condition_variable> // std::condition_variable
 #include <sched.h>
+#include <sstream>
 //#include "../uapi_linux_nd.h"
 #include "test_utils.h"
 #ifndef ETH_MAX_MTU
@@ -60,6 +62,9 @@
 #ifndef UDP_SEGMENT
 #define UDP_SEGMENT		103
 #endif
+
+#define CLIENT_PRINT_CSW_COUNT
+#define CLIENT_PRINT_VRUNTIME
 
 /* Determines message size in bytes for tests. */
 int length = 1000000;
@@ -239,7 +244,7 @@ void test_ndping_send(struct sockaddr *dest, int id, int io_depth, int flow_size
 	uint64_t sent_bytes = 0;
 	// uint64_t max_size = 10000000;
 
-	std::ofstream lfile, tfile;
+	std::ofstream lfile, tfile, hfile;
 	pid_t pid = syscall(__NR_gettid);
 	struct sockaddr_in client;
 	socklen_t clientsz = sizeof(client);
@@ -274,6 +279,35 @@ void test_ndping_send(struct sockaddr *dest, int id, int io_depth, int flow_size
 		exit(1);
 	}
 
+#ifdef CLIENT_PRINT_VRUNTIME
+	// per-thread final virtual runtime
+	std::ostringstream thread_sched_path;
+	thread_sched_path << "/proc/" << pid << "/sched";
+	std::ifstream sched_file(thread_sched_path.str());
+	if (!sched_file.is_open()) {
+		printf("Failed to open %s\n", thread_sched_path.str().c_str());
+	} else {
+		std::string line;
+		while (std::getline(sched_file, line)) {
+			if (line.find("se.vruntime") != std::string::npos) {
+				// format: "se.vruntime                                  :             0.000000"
+				std::istringstream iss(line);
+				std::string key, colon;
+				double vruntime_float;
+				long long vruntime;
+				if (iss >> key >> colon >> vruntime_float) {
+					vruntime = static_cast<long long>(vruntime_float * 1000000); // convert to microseconds
+					printf("pid: %d start-vruntime: %lld\n", pid, vruntime);
+				} else {
+					printf("Failed to parse vruntime line: %s\n", line.c_str());
+				}
+				break;
+			}
+		}
+		sched_file.close();
+	}
+	fflush(stdout);
+#endif
 
 	flag = 1;
 	// setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &flag, sizeof(int));
@@ -356,6 +390,42 @@ void test_ndping_send(struct sockaddr *dest, int id, int io_depth, int flow_size
 			break;
 	
 	}
+#ifdef CLIENT_PRINT_CSW_COUNT
+	// per-thread involuntary context switch count
+	struct rusage usage;
+	getrusage(RUSAGE_THREAD, &usage);
+	printf("pid: %d involuntary-context-switch-count: %ld\n", pid, usage.ru_nivcsw);
+	printf("pid: %d voluntary-context-switch-count: %ld\n", pid, usage.ru_nvcsw);
+#endif
+
+#ifdef CLIENT_PRINT_VRUNTIME
+	// per-thread final virtual runtime
+	sched_file.open(thread_sched_path.str());
+	if (!sched_file.is_open()) {
+		std::cerr << "Failed to open " << thread_sched_path.str() << std::endl;
+	} else {
+		std::string line;
+		while (std::getline(sched_file, line)) {
+			if (line.find("se.vruntime") != std::string::npos) {
+				// format: "se.vruntime                                  :             0.000000"
+				std::istringstream iss(line);
+				std::string key, colon;
+				double vruntime_float;
+				long long vruntime;
+				if (iss >> key >> colon >> vruntime_float) {
+					vruntime = static_cast<long long>(vruntime_float * 1000000); // convert to microseconds
+					printf("pid: %d final-vruntime: %lld\n", pid, vruntime);
+				} else {
+					printf("Failed to parse vruntime line: %s\n", line.c_str());
+				}
+				break;
+			}
+		}
+		sched_file.close();
+	}
+	fflush(stdout);
+#endif
+
 	lfile.open("temp/netperf-" + std::to_string(id)+".log");
 	tfile.open("temp/netperf-" + std::to_string(id)+"_thpt.log");
 	// tfile <<   pid << " " << ntohs(client.sin_port) << " "
@@ -371,9 +441,13 @@ void test_ndping_send(struct sockaddr *dest, int id, int io_depth, int flow_size
 	for(i = 0; i < NUM_BINS; i++) {
 		std::atomic_fetch_add(&time_hist[i], local_time_hist[i]);
 	}
+	
+	hfile.open("temp/netperf-" + std::to_string(id)+"_hist.bin", std::ios::binary);
+	hfile.write(reinterpret_cast<const char*>(local_time_hist.data()), local_time_hist.size() * sizeof(long long));
 
 	lfile.close();
 	tfile.close();
+	hfile.close();
 	close(fd);
 }
 
@@ -602,10 +676,11 @@ int main(int argc, char** argv)
 	struct addrinfo *matching_addresses;
 	struct sockaddr *dest;
 	struct addrinfo hints;
-	std::ofstream lfile;
+	std::ofstream lfile, hfile;
 	char *host, *port_name;
  	std::vector<std::thread> workers;
-	int cpu_list[16] = {0, 32, 4, 36, 8, 40, 12, 44, 16, 48, 20, 52, 24, 56, 28, 60};
+	int cpu_list[32] = {32, 96, 33, 97, 34, 98, 35, 99, 36, 100, 37, 101, 38, 102, 39, 103, 40, 104, 41, 105, 42, 106, 43, 107, 44, 108, 45, 109, 46, 110, 47, 111};
+	// int cpu_list[16] = {0, 32, 4, 36, 8, 40, 12, 44, 16, 48, 20, 52, 24, 56, 28, 60};
 //	int cpu_list[8] = {0, 4, 8, 12, 16, 20, 24, 28};
 	// char buffer[8000000] = "abcdefgh\n";
 	char *buffer = (char*)malloc(10000000);
@@ -619,9 +694,11 @@ int main(int argc, char** argv)
 	int srcPort = 10000;
 	int io_depth = 1;
 	int sc = 1;
+	int experiment_time = 300;
 	stop_count = 0;
 	atomic_store(&connected_count, 0);
 	lfile.open("temp/latency.log");
+	hfile.open("temp/overall_hist.bin",  std::ios::binary);
     for (i = 0; i < MAX_HIST_VALUE; ++i) {
         time_hist[i].store(0);
     }
@@ -730,6 +807,15 @@ int main(int argc, char** argv)
 			flow_size = get_int(argv[nextArg],
 				"Bad flow size %s; must be positive integer\n");
 			std::cout << "flow size:" << flow_size << std::endl;
+		} else if (strcmp(argv[nextArg], "--time") == 0){
+			if (nextArg == (argc-1)) {
+				printf("No value provided for %s option\n",
+					argv[nextArg]);
+				exit(1);
+			}
+			nextArg++;
+			experiment_time = get_int(argv[nextArg],
+				"Bad experiment time %s; must be positive integer\n");
 		} else {
 			printf("Unknown option %s; type '%s --help' for help\n",
 				argv[nextArg], argv[0]);
@@ -754,7 +840,7 @@ int main(int argc, char** argv)
 	tempArg = nextArg;
 	/* assume having hyperthreading */
 	sc = 2 * sc;
-	threads_per_core = thread_count / sc;
+	threads_per_core = thread_count / sc; // if sc = 1, sc = 2, threads_per_core = 26
 	for(i = 0; i < thread_count; i++) {
 		nextArg = tempArg;
 		// memset(&addr_in, 0, sizeof(addr_in));
@@ -782,8 +868,8 @@ int main(int argc, char** argv)
 							CPU_SET(cpu_list[(i * 2) % sc], &cpuset);
 						}
 					}
-					else 
-						CPU_SET(cpu_list[i / threads_per_core], &cpuset);
+					else // threads_per_core = 2, sc = 26
+						CPU_SET(cpu_list[(i / threads_per_core)%sc], &cpuset); // fix a small bug that could ping thread to core 0.
 					pthread_setaffinity_np(workers[workers.size() - 1].native_handle(), sizeof(cpu_set_t), &cpuset);
 				}	
 				//workers.push_back(std::thread(test_ndping_recv, fd, dest, srcPort - 10000));
@@ -802,13 +888,15 @@ int main(int argc, char** argv)
 		}
 	}
 	
-    std::this_thread::sleep_for (std::chrono::seconds(120));
+    std::this_thread::sleep_for (std::chrono::seconds(experiment_time));
 	stop_count = 1;
 	for(unsigned i = 0; i < workers.size(); i++) {
 		workers[i].join();
 	}
 	lfile << get_mean_timehist(time_hist) << " " << estimate_percentile(time_hist, 0.99) << " " << estimate_percentile(time_hist, 0.999)  << std::endl; 
 	lfile.close();
+	hfile.write(reinterpret_cast<const char*>(time_hist.data()), time_hist.size() * sizeof(std::atomic<long long>));
+	hfile.close();
 	free(buffer);
 	exit(0);
 }

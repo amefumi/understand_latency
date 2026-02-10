@@ -3,23 +3,20 @@ import subprocess
 from itertools import product
 
 # Define parameters
-hd="1"
+hd="sirq_eevdf_612_curve"
 our_patch="1"
-c_state=1
-num_apps = [1, 2, 4, 8, 16, 32, 36, 40, 44, 48, 52, 56]
-# need to run 8, 16
-# num_apps = [40, 44, 48, 52, 56]
-# num_apps =[84, 88]
-# 2, 4, 8, 16, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80
+c_state="1"
+num_apps = [1, 2, 4, 8, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64]
 flowsize = [64]
 iodepth = [1]
 dim = [1]
 pin = [1]
-permute = [2]
+permute = [1]
 hrtick = [0]
 sched = [0]
 cores = [1]
 runs = [0, 1, 2, 3, 4]
+dim_monitor = 0
 # Testing DIM disabled parameters
 # timeout = [90]
 # pkt_threshold = [28]
@@ -42,8 +39,6 @@ hrtick = {}
 sched = {}
 cores = {}
 timeout = {}
-pkt_t = {}
-runs = {}
 """
 # def wrtie_to_config(DIR, hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, timeout, pkt_t, run):
 def wrtie_to_config(DIR, hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, run):
@@ -63,11 +58,12 @@ def main():
     for n, f, i, d, p, perm, h, s, core, run in combinations:
         # Execute the main script
         # DIR = "results/{}_{}_{}/{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, t, pkt_t, run)
-        DIR = "results/{}_{}_{}/{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, run)
+        DIR = "/data0/projects/latency/{}_{}_{}/{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, run)
+        # DIR = "results/oldresults/{}_{}_{}/{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, run)
         os.makedirs(DIR, exist_ok=True)
         wrtie_to_config(DIR, hd, our_patch, c_state, n * core, f, i, d, p, perm, h, s, core, run)
         # command = f"./linux-both-8c-compute.sh {n * core} {DIR} {f} {i} {d} {p} {perm} {h} {s} {core} {run} {t} {pkt_t}"
-        command = f"./linux-both-8c-compute.sh {n * core} {DIR} {f} {i} {d} {p} {perm} {h} {s} {core} {run}"
+        command = f"./linux-both-8c-compute.sh {n * core} {DIR} {f} {i} {d} {p} {perm} {h} {s} {core} {run} {dim_monitor}"
         print(command)
         subprocess.run(command, shell=True)
         # get latency breakdown 
