@@ -1,0 +1,1 @@
+cmd_/home/ame/latency/read_rdpmc_escaped/modules.order := {   echo /home/ame/latency/read_rdpmc_escaped/latency_pmu_escaped.ko; :; } | awk '!x[$$0]++' - > /home/ame/latency/read_rdpmc_escaped/modules.order

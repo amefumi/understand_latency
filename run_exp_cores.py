@@ -3,19 +3,19 @@ import subprocess
 from itertools import product
 
 # Define parameters
-hd="nirq_eevdf_612_cores"
+hd="dirq_non64"
 our_patch="1"
 c_state="1"
-num_apps = [2, 4, 8, 16, 24, 32, 40, 44, 48, 52, 56, 64, 80, 96]
-flowsize = [64]
+num_apps = [4, 8, 16, 24, 32, 48, 52]
+flowsize = [128]
 iodepth = [1]
 dim = [1] 
 pin = [1]
 permute = [1]
 hrtick = [0]
 sched = [0]
-cores = [16]
-runs = [0, 1]
+cores = [1]
+runs = [0]
 dim_monitor = 0
 # Testing DIM disabled parameters
 # timeout = [90]

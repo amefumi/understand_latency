@@ -4,4 +4,6 @@ sudo killall pingpong_server
 sudo killall bpftrace
 sudo rmmod iter_thread
 sudo rmmod filter
+sudo rmmod latency_pmu
 sudo killall sleep
+sudo killall iperf3

@@ -64,8 +64,8 @@ mpl.rcParams.update({
 })
 
 
-pad_left   = 0.9
-pad_right  = 0.5
+pad_left   = 0.6
+pad_right  = 0.95
 pad_bottom = 0.7
 pad_top    = 0.15
 
@@ -106,7 +106,7 @@ if __name__ == "__main__":
     values = [single_core_results, multi_cores_results]
 
     ax_height = 2.2
-    ax_width = 3.45/1.1
+    ax_width = 2.8
     fig_width = 20
     fig_height = 20
 
@@ -186,10 +186,16 @@ if __name__ == "__main__":
     ax.set_xlim(-1, 3.5)
     ax.set_xticklabels(series, ha='center')
     ax.tick_params(axis="x", which='both', rotation=15)
+    offset = transforms.ScaledTranslation(-15 / 72, 0, fig.dpi_scale_trans)
+    for label in ax.get_xticklabels():
+        label.set_transform(label.get_transform() + offset)
 
     ax.set_ylim(0, 6e7)
     ax.set_yticks(np.arange(0, 6.5e7, 2e7), ["0", r"2x10$^7$", "4x10$^7$", "6x10$^7$" ])
     ax.set_ylabel("#Interrupts")
+    ax.yaxis.set_label_position("right")
+    ax.yaxis.tick_right()
+
     ax.grid(
         True,
         which="major",
@@ -207,16 +213,16 @@ if __name__ == "__main__":
         pass
 
     xticks = ax.xaxis.get_major_ticks()
-    xticks[0].tick1line.set_markersize(0)
-    xticks[0].tick2line.set_markersize(0)
-    xticks[-1].tick1line.set_markersize(0)
-    xticks[-1].tick2line.set_markersize(0)
+    # xticks[0].tick1line.set_markersize(0)
+    # xticks[0].tick2line.set_markersize(0)
+    # xticks[-1].tick1line.set_markersize(0)
+    # xticks[-1].tick2line.set_markersize(0)
     yticks = ax.yaxis.get_major_ticks()
-    yticks[0].tick1line.set_markersize(0)
-    yticks[0].tick2line.set_markersize(0)
-    yticks[-1].tick1line.set_markersize(0)
-    yticks[-1].tick2line.set_markersize(0)
-    ax.tick_params(which="both", top=True, right=True)
+    # yticks[0].tick1line.set_markersize(0)
+    # yticks[0].tick2line.set_markersize(0)
+    # yticks[-1].tick1line.set_markersize(0)
+    # yticks[-1].tick2line.set_markersize(0)
+    ax.tick_params(which="both", top=True, right=True, left=True)
 
     pos = ax.get_position()
     fig_w, fig_h = fig.get_size_inches()
@@ -234,4 +240,4 @@ if __name__ == "__main__":
     # legend
     ax.legend(loc='upper left', markerfirst=False, labelspacing=0.2, facecolor='white', edgecolor='white', framealpha=1)
 
-    plt.savefig(os.path.join(result_dir, "interrupts_by_threads_cores_260120.pdf"), bbox_inches=bbox)
+    plt.savefig(os.path.join(result_dir, "interrupts_by_threads_cores_260625.pdf"), bbox_inches=bbox)

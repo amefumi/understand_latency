@@ -3,19 +3,26 @@ import subprocess
 from itertools import product
 
 # Define parameters
-hd="airq_client_decoupled"
-our_patch="5"
-c_state=1
-num_apps = [52]
+# hd="sirq_rdpmc_commensalism"
+hd="nirq_iperf_bidirectional"
+our_patch="1"
+c_state="1"
+num_apps = [2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120]
+# num_apps = [36, 44]
+# num_apps = [32, 48]
+# num_apps = [48]
 flowsize = [64]
 iodepth = [1]
-dim = [2]
+dim = [1]
 pin = [1]
-permute = [3]
+permute = [1]
 hrtick = [0]
 sched = [0]
-cores = [13]
-runs = [0, 1, 2, 3, 4]
+cores = [1]
+runs = [0, 1, 2]
+iperf_conns = 1
+# Note this is connections per logical core, threads per logical core is 2x this number.
+
 # Testing DIM disabled parameters
 # timeout = [90]
 # pkt_threshold = [28]
@@ -57,11 +64,12 @@ def main():
     for n, f, i, d, p, perm, h, s, core, run in combinations:
         # Execute the main script
         # DIR = "results/{}_{}_{}/{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, t, pkt_t, run)
-        DIR = "/data0/projects/latency/{}_{}_{}/{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, run)
+        DIR = "/data1/projects/latency/{}_{}_{}/{}_{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, iperf_conns, run)
+        # DIR = "results/oldresults/{}_{}_{}/{}_{}_{}_{}_{}_{}_{}_{}_{}_{}".format(hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, run)
         os.makedirs(DIR, exist_ok=True)
-        wrtie_to_config(DIR, hd, our_patch, c_state, n, f, i, d, p, perm, h, s, core, run)
+        wrtie_to_config(DIR, hd, our_patch, c_state, n * core, f, i, d, p, perm, h, s, core, run)
         # command = f"./linux-both-8c-compute.sh {n * core} {DIR} {f} {i} {d} {p} {perm} {h} {s} {core} {run} {t} {pkt_t}"
-        command = f"./linux-both-8c-compute-decouple-client.sh {n} {DIR} {f} {i} {d} {p} {perm} {h} {s} {core} {run}"
+        command = f"./linux-both-8c-compute-iperf.sh {n * core} {DIR} {f} {i} {d} {p} {perm} {h} {s} {core} {run} {iperf_conns}"
         print(command)
         subprocess.run(command, shell=True)
         # get latency breakdown 

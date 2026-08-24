@@ -117,5 +117,6 @@ if __name__ == "__main__":
     #     interrupts_data = os.path.join(result_dir, experiment_name, f"{saved_file_name}.data")
     #     parse_experiment(experiment_name)
 
-    path = "/data0/projects/latency/nirq_eevdf_flamegraph_2_1/32_64_1_1_1_1_0_0_1_0"
+    # path = "/data0/projects/latency/nirq_eevdf_flamegraph_2_1/32_64_1_1_1_1_0_0_1_0"
+    path = "/data1/projects/latency/sirq_heter_1_1/48_64_1_1_1_1_0_0_1_0"
     parse_by_path(path)

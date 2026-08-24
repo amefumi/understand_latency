@@ -28,41 +28,43 @@ echo "$DIR"
 
 LOG=$((997 / N))
 if [[ $N -gt 10 ]]; then LOG=200; fi
-
+# LOG=500
 uname -r > $DIR/kernel_version.log
 
-# # client-side
-# sudo trace-cmd clear
-# sudo sysctl -w net.core.latency_breakdown_on=1
-# sudo sysctl -w net.core.latency_rx_sched_lat_only=0
-# sudo sysctl -w net.core.latency_breakdown_nrfs=0
-# sudo sysctl -w net.core.latency_breakdown_log=$LOG
-# sudo sysctl -w net.core.latency_breakdown_validation=0
-# sudo sysctl -w net.core.latency_dumb_schedule_complete=0
-sudo sysctl -w net.core.latency_dumb_schedule_tcp_send=0
-# sudo sysctl -w net.core.latency_dumb_schedule_rx_sleep=0
-# # sudo sysctl -w kernel.sched_wakeup_granularity_ns=999999999
+# client-side
+sudo trace-cmd clear
+sudo sysctl -w net.core.latency_breakdown_on=0
+sudo sysctl -w net.core.latency_rx_sched_lat_only=0
+sudo sysctl -w net.core.latency_breakdown_nrfs=0
+sudo sysctl -w net.core.latency_breakdown_log=$LOG
+sudo sysctl -w net.core.latency_breakdown_validation=0
+sudo sysctl -w net.core.latency_dumb_schedule_weight=1000
+sudo sysctl -w net.core.latency_dumb_schedule_disable_clamp=0 # 0 means enable clamp now
+sudo sysctl -w net.core.latency_dumb_schedule_enable=0
+sudo sysctl -w net.core.latency_perstage_rdpmc_on=0 # enable rdpmc for latency breakdown
+# sudo sysctl -w kernel.sched_wakeup_granularity_ns=999999999 # Note: this is used to disable wake up preemption
 
-# echo 1 | sudo tee /sys/kernel/debug/tracing/tracing_on
-echo 1 | sudo tee /sys/module/core/parameters/accu_irq_accounting
-echo 1 | sudo tee /sys/module/core/parameters/scheduler_accounting
+echo 0 | sudo tee /sys/kernel/debug/tracing/tracing_on
+echo 0 | sudo tee /sys/module/core/parameters/accu_irq_accounting
+echo 0 | sudo tee /sys/module/core/parameters/scheduler_accounting
 
 
-# # server-side
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S trace-cmd clear"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_on=1"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_rx_sched_lat_only=0"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_nrfs=0"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_log=$LOG"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_validation=0"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_complete=0"
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_tcp_send=0"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_rx_sleep=0"
-# # ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w kernel.sched_wakeup_granularity_ns=999999999"
+# server-side
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S trace-cmd clear"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_on=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_rx_sched_lat_only=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_nrfs=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_log=$LOG"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_validation=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_weight=1000"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_disable_clamp=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_enable=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_perstage_rdpmc_on=0"
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w kernel.sched_wakeup_granularity_ns=999999999" # Note: this is used to disable wake up preemption
 
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 1 | sudo tee /sys/kernel/debug/tracing/tracing_on"
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 1 | sudo tee /sys/module/core/parameters/accu_irq_accounting"
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 1 | sudo tee /sys/module/core/parameters/scheduler_accounting"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 0 | sudo tee /sys/kernel/debug/tracing/tracing_on"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 0 | sudo tee /sys/module/core/parameters/accu_irq_accounting"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 0 | sudo tee /sys/module/core/parameters/scheduler_accounting"
 
 
 # Customized scheduler settings:
@@ -109,7 +111,10 @@ then
 else
     FRAMES=$(((N/SC+3)/4))	# frames = N/4
 	# USECS=$(((5*N/SC+3)/4)) # usecs = (N/4) * (1/(0.4/2)) = 1.25 * N
-    USECS=$((N/SC)) # usecs = N
+	# USECS=$(((9*N + 7) / 8)) # usecs = (N/4) * (1/0.45/2) = 1.125 * N # 48 -> 54
+    # USECS=$((N/SC)) # usecs = N
+	USECS=$(((7*(N/SC)+7)/8))
+	# USECS=42
     echo "[DIM] Automatic tuning: rx/tx-frames: $FRAMES rx/tx-usecs:  $USECS"
     ssh $USER@$TARGETC -t "echo $SUDOPW | sudo -S ethtool -C $INTF adaptive-rx off adaptive-tx off"
     ssh $USER@$TARGETC -t "echo $SUDOPW | sudo -S ethtool -C $INTF \
@@ -145,9 +150,16 @@ ssh $USER\@$TARGETC -t "cat /proc/interrupts" > $DIR/interrupt_before_server
 ssh $USER\@$TARGETC -t "cat /proc/softirqs" > $DIR/softirq_before_server
 ssh $USER\@$TARGETC -t "ifconfig $INTF" > $DIR/ifconfig_before_server
 
-#　Enable virtual runtime monitoring: total_count=1200 interval_ms=100
-sudo insmod $TARGETDIR/iter_thread/iter_thread.ko total_count=300 interval_ms=1000
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S insmod $TARGETDIR/iter_thread/iter_thread.ko total_count=300 interval_ms=1000"
+# # Enable rdpmc monitoring
+# echo 0 | sudo tee /proc/sys/kernel/nmi_watchdog
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 0 | sudo tee /proc/sys/kernel/nmi_watchdog"
+# sudo insmod /home/ame/latency/read_rdpmc/latency_pmu.ko
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S insmod /home/ame/latency/read_rdpmc/latency_pmu.ko"
+
+
+# #　Enable virtual runtime monitoring: total_count=1200 interval_ms=100
+# sudo insmod $TARGETDIR/iter_thread/iter_thread.ko total_count=300 interval_ms=1000
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S insmod $TARGETDIR/iter_thread/iter_thread.ko total_count=300 interval_ms=1000"
 
 # # # Enable Netfilter
 # sudo insmod $TARGETDIR/netfilter/filter.ko
@@ -290,9 +302,10 @@ sudo sysctl -w net.core.latency_breakdown_on=0
 sudo sysctl -w net.core.latency_rx_sched_lat_only=0
 sudo sysctl -w net.core.latency_breakdown_nrfs=0
 sudo sysctl -w net.core.latency_breakdown_validation=0
-sudo sysctl -w net.core.latency_dumb_schedule_complete=0
-sudo sysctl -w net.core.latency_dumb_schedule_tcp_send=0
-sudo sysctl -w net.core.latency_dumb_schedule_rx_sleep=0
+sudo sysctl -w net.core.latency_dumb_schedule_weight=156 # just reset to default value
+sudo sysctl -w net.core.latency_dumb_schedule_disable_clamp=0
+sudo sysctl -w net.core.latency_dumb_schedule_enable=0
+sudo sysctl -w net.core.latency_perstage_rdpmc_on=0
 
 # sudo sysctl -w kernel.sched_wakeup_granularity_ns=4000000
 
@@ -308,9 +321,10 @@ ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakd
 ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_rx_sched_lat_only=0"
 ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_nrfs=0"
 ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_validation=0"
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_complete=0"
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_tcp_send=0"
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_rx_sleep=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_weight=156"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_disable_clamp=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_enable=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_perstage_rdpmc_on=0"
 
 # ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w kernel.sched_wakeup_granularity_ns=4000000"
 ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S cat /sys/kernel/debug/tracing/trace > $TARGETDIR/latency/temp/latencies-$N-server.log"
@@ -357,13 +371,18 @@ fi
 # sudo tail -n 500  /var/log/kern.log > temp/pkt_dist_client.log
 # ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v && sudo tail -n 500  /var/log/kern.log" > temp/pkt_dist_server.log
 
-# Stop virtual runtime monitoring:
-	# 550 for only iter_thread, 700 for both iter_thread and filter, 6000 for finer details
-sudo rmmod iter_thread
-sudo tail -n 1700  /var/log/kern.log > $DIR/iter_thread_client.log
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S rmmod iter_thread"
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S tail -n 1700  /var/log/kern.log" > $DIR/iter_thread_server.log
+# # Stop virtual runtime monitoring:
+# 	# 550 for only iter_thread, 700 for both iter_thread and filter, 6000 for finer details
+# sudo rmmod iter_thread
+# sudo tail -n 1700  /var/log/kern.log > $DIR/iter_thread_client.log
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S rmmod iter_thread"
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S tail -n 1700  /var/log/kern.log" > $DIR/iter_thread_server.log
 
+# # Stop rdpmc monitoring
+# echo 1 | sudo tee /proc/sys/kernel/nmi_watchdog
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 1 | sudo tee /proc/sys/kernel/nmi_watchdog"
+# sudo rmmod latency_pmu
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S rmmod latency_pmu"
 
 # Move data to experiment result folder
 sudo mv temp/*.log $DIR/

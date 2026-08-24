@@ -94,7 +94,7 @@ series = [
     "latency_throughput_best_48threads",
 ]
 
-saved_figure_name = "latency_throughput_curve_best_250113"
+saved_figure_name = "latency_throughput_curve_best_260625"
 
 log = False
 max_latency = 100000
@@ -102,7 +102,7 @@ max_throughput = 2
 divider = 1
 
 ax_height = 2.2
-ax_width = 3.85/1.1
+ax_width = 3.85/1.05
 fig_width = 20
 fig_height = 20
 

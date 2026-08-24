@@ -1,5 +1,7 @@
 #!/bin/bash
-
+sudo systemctl stop apparmor
+sudo systemctl disable apparmor
+sudo aa-teardown
 # Disable Atera Agent
 sudo systemctl stop AteraAgent
 sudo pkill -f Atera

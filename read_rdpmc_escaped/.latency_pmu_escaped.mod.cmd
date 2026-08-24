@@ -1,0 +1,1 @@
+cmd_/home/ame/latency/read_rdpmc_escaped/latency_pmu_escaped.mod := { echo  /home/ame/latency/read_rdpmc_escaped/latency_pmu_escaped.o;  echo; } > /home/ame/latency/read_rdpmc_escaped/latency_pmu_escaped.mod

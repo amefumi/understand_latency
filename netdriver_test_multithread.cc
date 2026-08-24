@@ -862,10 +862,12 @@ int main(int argc, char** argv)
 					cpu_set_t cpuset;
 					CPU_ZERO(&cpuset);
 					if(thread_count == 1 || threads_per_core == 0) {
-						if(sc == 2)
+						if(sc == 2) // when there is only a single physical core, threads_per_core == 0 literally means thread_count == 1, and sc == 1
 							CPU_SET(cpu_list[0], &cpuset);
-						else {
-							CPU_SET(cpu_list[(i * 2) % sc], &cpuset);
+						else { // when we have multple physical core, threads_per_core == 0 means thread_count < logic cores
+							// the subtle point is, since we move multiple core case to different *_cores binary, we don't need a very 
+							CPU_SET(cpu_list[i % sc], &cpuset); // [ame] since this program now only serve decouple and single core, we adjust here
+							// to set threads_per_core=1, so decoupeld client can be pinned to different cores when threads < sc (i.e., 32).
 						}
 					}
 					else // threads_per_core = 2, sc = 26

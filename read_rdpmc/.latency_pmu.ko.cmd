@@ -1,0 +1,1 @@
+cmd_/home/ame/latency/read_rdpmc/latency_pmu.ko := ld -r -m elf_x86_64 --build-id=sha1  -T scripts/module.lds -o /home/ame/latency/read_rdpmc/latency_pmu.ko /home/ame/latency/read_rdpmc/latency_pmu.o /home/ame/latency/read_rdpmc/latency_pmu.mod.o;  true

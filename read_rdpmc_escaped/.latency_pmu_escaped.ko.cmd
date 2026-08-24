@@ -1,0 +1,1 @@
+cmd_/home/ame/latency/read_rdpmc_escaped/latency_pmu_escaped.ko := ld -r -m elf_x86_64 --build-id=sha1  -T scripts/module.lds -o /home/ame/latency/read_rdpmc_escaped/latency_pmu_escaped.ko /home/ame/latency/read_rdpmc_escaped/latency_pmu_escaped.o /home/ame/latency/read_rdpmc_escaped/latency_pmu_escaped.mod.o;  true

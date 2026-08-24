@@ -65,7 +65,7 @@ mpl.rcParams.update({
 })
 
 pad_left   = 0.8
-pad_right  = 0.6
+pad_right  = 0.2
 pad_bottom = 0.7
 pad_top    = 0.15
 
@@ -88,7 +88,7 @@ result_dir = "/data0/projects/latency/"
 # saved_file_name = "latency_throughput_new_cstate"
 saved_file_name = "latency_throughput_eevdf_curve"
 
-saved_figure_name = "latency_throughput_curve_eevdf_250202"
+saved_figure_name = "latency_throughput_curve_eevdf_250202_1"
 
 # experiments = ["combined_nirq", "combined_dirq", "combined_sirq", "combined_pcbs"]
 experiments = ["combined_nirq", "combined_sirq", "combined_autodim"]
@@ -98,12 +98,14 @@ labels = ["EEVDF", "EEVDF + ACCa", "EEVDF + ACCa + AutoDIM"]
 
 log = False
 max_latency = 600
-max_throughput = 0.5
+# max_throughput = 0.5
+max_throughput = 0.45
 
 # Initialize figure and axis
 # y:x = 7:4
 ax_height = 2.2
-ax_width = 3.85
+# ax_width = 3.85
+ax_width = 3.85/1.1
 fig_width = 20
 fig_height = 20
 
@@ -153,7 +155,7 @@ for experiment_index, experiment_name in enumerate(experiments):
 # set_major_locator and set_minor_locator for both axes
 if not log:
     ax.xaxis.set_major_locator(MultipleLocator(0.1))
-    ax.xaxis.set_minor_locator(MultipleLocator(0.05))
+    # ax.xaxis.set_minor_locator(MultipleLocator(0.05))
     ax.yaxis.set_major_locator(MultipleLocator(1000))
 # ax.grid(True, which="both", color='grey', linestyle='--', linewidth=0.5, zorder=2)
 ax.grid(

@@ -37,14 +37,15 @@ uname -r > $DIR/kernel_version.log
 
 # client-side
 sudo trace-cmd clear
-# sudo sysctl -w net.core.latency_breakdown_on=1
-# sudo sysctl -w net.core.latency_rx_sched_lat_only=1
-# sudo sysctl -w net.core.latency_breakdown_nrfs=0
-# sudo sysctl -w net.core.latency_breakdown_log=$LOG
-# sudo sysctl -w net.core.latency_breakdown_validation=0
-# sudo sysctl -w net.core.latency_dumb_schedule_weight=156
-# sudo sysctl -w net.core.latency_dumb_schedule_disable_clamp=0 # 0 means disable... bad code...
-# sudo sysctl -w net.core.latency_dumb_schedule_enable=1
+sudo sysctl -w net.core.latency_breakdown_on=1
+sudo sysctl -w net.core.latency_rx_sched_lat_only=0
+sudo sysctl -w net.core.latency_breakdown_nrfs=0
+sudo sysctl -w net.core.latency_breakdown_log=$LOG
+sudo sysctl -w net.core.latency_breakdown_validation=0
+sudo sysctl -w net.core.latency_dumb_schedule_weight=156
+sudo sysctl -w net.core.latency_dumb_schedule_disable_clamp=0 # 0 means enable clamp now
+sudo sysctl -w net.core.latency_dumb_schedule_enable=0
+sudo sysctl -w net.core.latency_perstage_rdpmc_on=0 # enable rdpmc for latency breakdown
 # sudo sysctl -w kernel.sched_wakeup_granularity_ns=999999999 # Note: this is used to disable wake up preemption
 
 # echo 1 | sudo tee /sys/kernel/debug/tracing/tracing_on
@@ -54,14 +55,15 @@ echo 1 | sudo tee /sys/module/core/parameters/scheduler_accounting
 
 # server-side
 ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S trace-cmd clear"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_on=1"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_rx_sched_lat_only=1"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_nrfs=0"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_log=$LOG"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_validation=0"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_weight=156"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_disable_clamp=0"
-# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_enable=1"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_on=1"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_rx_sched_lat_only=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_nrfs=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_log=$LOG"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_breakdown_validation=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_weight=156"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_disable_clamp=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_dumb_schedule_enable=0"
+ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w net.core.latency_perstage_rdpmc_on=0"
 # ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S sysctl -w kernel.sched_wakeup_granularity_ns=999999999" # Note: this is used to disable wake up preemption
 
 # ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S -v; echo 1 | sudo tee /sys/kernel/debug/tracing/tracing_on"
@@ -294,16 +296,16 @@ echo $SUDOPW | sudo -S echo "Local shell privilege escalation after experiment s
 sleep 5 # wait for server side perf/bpftrace to finish
 
 # Perf: generate flamegraph after periodic calling graph sampling
-sudo /home/ame/perf script -i $TARGETDIR/latency/temp/perf_sample_client.data > $TARGETDIR/latency/temp/perf_sample_client.perf
-/home/ame/FlameGraph/stackcollapse-perf.pl $TARGETDIR/latency/temp/perf_sample_client.perf > $TARGETDIR/latency/temp/perf_sample_client.folded
-/home/ame/FlameGraph/flamegraph.pl $TARGETDIR/latency/temp/perf_sample_client.folded > $TARGETDIR/latency/temp/perf_sample_client.svg
-ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S /home/ame/perf script -i $TARGETDIR/latency/temp/perf_sample_server.data > $TARGETDIR/latency/temp/perf_sample_server.perf"
-ssh $USER\@$TARGETC -t "/home/ame/FlameGraph/stackcollapse-perf.pl $TARGETDIR/latency/temp/perf_sample_server.perf > $TARGETDIR/latency/temp/perf_sample_server.folded"
-ssh $USER\@$TARGETC -t "/home/ame/FlameGraph/flamegraph.pl $TARGETDIR/latency/temp/perf_sample_server.folded > $TARGETDIR/latency/temp/perf_sample_server.svg"
+# sudo /home/ame/perf script -i $TARGETDIR/latency/temp/perf_sample_client.data > $TARGETDIR/latency/temp/perf_sample_client.perf
+# /home/ame/FlameGraph/stackcollapse-perf.pl $TARGETDIR/latency/temp/perf_sample_client.perf > $TARGETDIR/latency/temp/perf_sample_client.folded
+# /home/ame/FlameGraph/flamegraph.pl $TARGETDIR/latency/temp/perf_sample_client.folded > $TARGETDIR/latency/temp/perf_sample_client.svg
+# ssh $USER\@$TARGETC -t "echo $SUDOPW | sudo -S /home/ame/perf script -i $TARGETDIR/latency/temp/perf_sample_server.data > $TARGETDIR/latency/temp/perf_sample_server.perf"
+# ssh $USER\@$TARGETC -t "/home/ame/FlameGraph/stackcollapse-perf.pl $TARGETDIR/latency/temp/perf_sample_server.perf > $TARGETDIR/latency/temp/perf_sample_server.folded"
+# ssh $USER\@$TARGETC -t "/home/ame/FlameGraph/flamegraph.pl $TARGETDIR/latency/temp/perf_sample_server.folded > $TARGETDIR/latency/temp/perf_sample_server.svg"
 
 scp -r $USER\@$TARGETC:$TARGETDIR/latency/temp/server.log temp/
 scp -r $USER\@$TARGETC:$TARGETDIR/latency/temp/server_nivcsw.log temp/
-scp -r $USER\@$TARGETC:$TARGETDIR/latency/temp/perf_sample_server.svg temp/ # should not need privilege?
+# scp -r $USER\@$TARGETC:$TARGETDIR/latency/temp/perf_sample_server.svg temp/ # should not need privilege?
 # scp -r $USER\@$TARGETC:$TARGETDIR/latency/temp/perf_overall_cache_server.log temp/
 
 # # Perf: copy perf data with correct permission: note this seems to be useless, perf data cannot be understood cross machines
@@ -401,8 +403,8 @@ fi
 sudo mv temp/*.log $DIR/
 sudo mv temp/*.bin $DIR/
 # sudo mv temp/cache_sample_server.data $DIR/
-sudo mv temp/perf_sample_client.svg $DIR/
-sudo mv temp/perf_sample_server.svg $DIR/
+# sudo mv temp/perf_sample_client.svg $DIR/
+# sudo mv temp/perf_sample_server.svg $DIR/
 ./parse/parse-netperf.py $DIR $N > $DIR/linux_latency
 
 # if [[ $IODEPTH -eq 1 ]];

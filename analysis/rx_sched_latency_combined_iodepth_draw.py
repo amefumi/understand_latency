@@ -178,15 +178,24 @@ for serie_index, serie_name in enumerate(throughput_series):
         num_threads, avg_lat999, avg_throughput = data[:, 0], data[:, 1], data[:, 2]
         num_threads, rx_sched_mean, rx_sched_mid, rx_sched_p999, rx_sched_client, rx_sched_server = rx_sched_data[:, 0], rx_sched_data[:, 1]/1e3, rx_sched_data[:, 2]/1e3, rx_sched_data[:, 3]/1e3, rx_sched_data[:, 4]/1e3, rx_sched_data[:, 5]/1e3
 
+        if serie_index == 2:
+            print(experiment_name)
+            print("client")
+            print(rx_sched_client/avg_lat999)
+            print("server")
+            print(rx_sched_server/avg_lat999)
+            print("added")
+            print((rx_sched_client+rx_sched_server)/avg_lat999)
+
         # Draw the latency-throughput curve for each series
-        if combined_mode:
-            ax.plot(avg_throughput, rx_sched_p999, color=colors[experiment_index], label=labels[experiment_index], zorder=zorder[experiment_index], 
-                marker=markers[experiment_index], markersize=markers_size[experiment_index], markerfacecolor=marker_facecolor[experiment_index], markeredgewidth=markers_width[experiment_index])
-        else:
-            ax.plot(avg_throughput, rx_sched_client, color=colors[experiment_index], label=labels[experiment_index]+":  Client", zorder=zorder[experiment_index], 
-                marker=markers[experiment_index], markersize=markers_size[experiment_index], markerfacecolor=marker_facecolor[experiment_index], markeredgewidth=markers_width[experiment_index], solid_capstyle="round", solid_joinstyle="round")
-            ax.plot(avg_throughput, rx_sched_server, color=colors_tiny[experiment_index], label="Server", zorder=zorder[experiment_index], 
-                marker=markers[experiment_index], markersize=markers_size[experiment_index], markerfacecolor=marker_facecolor[experiment_index], markeredgewidth=markers_width[experiment_index], linestyle='--', solid_capstyle="round", solid_joinstyle="round")
+        # if combined_mode:
+        #     ax.plot(avg_throughput, rx_sched_p999, color=colors[experiment_index], label=labels[experiment_index], zorder=zorder[experiment_index], 
+        #         marker=markers[experiment_index], markersize=markers_size[experiment_index], markerfacecolor=marker_facecolor[experiment_index], markeredgewidth=markers_width[experiment_index])
+        # else:
+        #     ax.plot(avg_throughput, rx_sched_client, color=colors[experiment_index], label=labels[experiment_index]+":  Client", zorder=zorder[experiment_index], 
+        #         marker=markers[experiment_index], markersize=markers_size[experiment_index], markerfacecolor=marker_facecolor[experiment_index], markeredgewidth=markers_width[experiment_index], solid_capstyle="round", solid_joinstyle="round")
+        #     ax.plot(avg_throughput, rx_sched_server, color=colors_tiny[experiment_index], label="Server", zorder=zorder[experiment_index], 
+        #         marker=markers[experiment_index], markersize=markers_size[experiment_index], markerfacecolor=marker_facecolor[experiment_index], markeredgewidth=markers_width[experiment_index], linestyle='--', solid_capstyle="round", solid_joinstyle="round")
 
         # Optional: annotate each point with the number of threads
         # for i, txt in enumerate(num_threads):
@@ -205,49 +214,49 @@ for serie_index, serie_name in enumerate(throughput_series):
     # if not log:
     #     ax.xaxis.set_major_locator(MultipleLocator(0.2))
     # ax.grid(True, which="both", color='grey', linestyle='--', linewidth=0.5, zorder=2)
-    ax.grid(
-        True,
-        which="major",
-        linestyle=(0, (0, 2)),
-        linewidth=2,
-        color="black",
-        dash_capstyle="round",
-        alpha=1.0,
-        zorder=1,
-    )
+    # ax.grid(
+    #     True,
+    #     which="major",
+    #     linestyle=(0, (0, 2)),
+    #     linewidth=2,
+    #     color="black",
+    #     dash_capstyle="round",
+    #     alpha=1.0,
+    #     zorder=1,
+    # )
 
-    ax.set_xlabel('Throughput (million IOPS)', labelpad=8)
-    ax.set_ylabel('P99.9 rx_sched (us)', labelpad=8)
+    # ax.set_xlabel('Throughput (million IOPS)', labelpad=8)
+    # ax.set_ylabel('P99.9 rx_sched (us)', labelpad=8)
 
-    ax.set_xlim(0, max_throughput)
-    ax.set_xticks(np.arange(0, max_throughput+0.05, 0.25), ["0", "0.25", "0.5", "0.75", "1.0", "1.25", "1.5", "1.75", "2.0"])
-    xticks = ax.xaxis.get_major_ticks()
-    xticks[0].tick1line.set_markersize(0)
-    xticks[0].tick2line.set_markersize(0)
-    xticks[-1].tick1line.set_markersize(0)
-    xticks[-1].tick2line.set_markersize(0)
+    # ax.set_xlim(0, max_throughput)
+    # ax.set_xticks(np.arange(0, max_throughput+0.05, 0.25), ["0", "0.25", "0.5", "0.75", "1.0", "1.25", "1.5", "1.75", "2.0"])
+    # xticks = ax.xaxis.get_major_ticks()
+    # xticks[0].tick1line.set_markersize(0)
+    # xticks[0].tick2line.set_markersize(0)
+    # xticks[-1].tick1line.set_markersize(0)
+    # xticks[-1].tick2line.set_markersize(0)
 
-    ax.set_ylim(10, max_latency)
-    ax.set_yscale('log')
-    ax.set_yticks([10, 100, 1000, 10000, 100000])
-    yticks = ax.yaxis.get_major_ticks()
-    yticks[0].tick1line.set_markersize(0)
-    yticks[0].tick2line.set_markersize(0)
-    # yticks[-1].tick1line.set_markersize(0)
-    # yticks[-1].tick2line.set_markersize(0)
+    # ax.set_ylim(10, max_latency)
+    # ax.set_yscale('log')
+    # ax.set_yticks([10, 100, 1000, 10000, 100000])
+    # yticks = ax.yaxis.get_major_ticks()
+    # yticks[0].tick1line.set_markersize(0)
+    # yticks[0].tick2line.set_markersize(0)
+    # # yticks[-1].tick1line.set_markersize(0)
+    # # yticks[-1].tick2line.set_markersize(0)
 
-    ax.tick_params(which="both", top=True, right=True)
+    # ax.tick_params(which="both", top=True, right=True)
 
-    if serie_index == 0:
-        if combined_mode:
-            legend = ax.legend(loc='upper left', markerfirst=False, labelspacing=0.2, facecolor='white', edgecolor='white', framealpha=1)
-        else:
-            handles, labels = ax.get_legend_handles_labels()
+    # if serie_index == 0:
+    #     if combined_mode:
+    #         legend = ax.legend(loc='upper left', markerfirst=False, labelspacing=0.2, facecolor='white', edgecolor='white', framealpha=1)
+    #     else:
+    #         handles, labels = ax.get_legend_handles_labels()
 
-            new_handles = [handles[0], handles[2], handles[4], handles[1], handles[3], handles[5]]
-            new_labels  = [labels[0], labels[2], labels[4], labels[1], labels[3], labels[5]]
+    #         new_handles = [handles[0], handles[2], handles[4], handles[1], handles[3], handles[5]]
+    #         new_labels  = [labels[0], labels[2], labels[4], labels[1], labels[3], labels[5]]
 
-            legend = ax.legend(new_handles, new_labels, loc='upper left', markerfirst=False, labelspacing=0.1, facecolor='white', edgecolor='white', framealpha=1, ncol=2, columnspacing=1.2, handletextpad=0.4)
-            legend.set_zorder(4)
-    # legend.get_frame().set_edgecolor('none')
-    fig.savefig(os.path.join(result_dir, f'{saved_figure_name}_{serie_index}.pdf'), bbox_inches='tight')
+    #         legend = ax.legend(new_handles, new_labels, loc='upper left', markerfirst=False, labelspacing=0.1, facecolor='white', edgecolor='white', framealpha=1, ncol=2, columnspacing=1.2, handletextpad=0.4)
+    #         legend.set_zorder(4)
+    # # legend.get_frame().set_edgecolor('none')
+    # fig.savefig(os.path.join(result_dir, f'{saved_figure_name}_{serie_index}.pdf'), bbox_inches='tight')

@@ -59,12 +59,12 @@ mpl.rcParams.update({
     "axes.labelweight": 600,
 
     # legend
-    "legend.fontsize": 13,
+    "legend.fontsize": 12,
 
 })
 
-pad_left   = 0.8
-pad_right  = 0.6
+pad_left   = 0.7
+pad_right  = 0.15
 pad_bottom = 0.7
 pad_top    = 0.15
 
@@ -73,9 +73,11 @@ if __name__ == "__main__":
 
     result_dir = "/data0/projects/latency/"
 
-    series = ["CFS + ACCa", "EEVDF + ACCa"]
+    series = ["CFS+ACCa", "EEVDF+ACCa"]
 
-    settings = ["Normal (32 in-flights)", "High-load (256 in-flights)"]
+    # settings = ["Normal (32 in-flights)", "High-load (256 in-flights)"]
+
+    settings = ["32 in-flights", "256 in-flights"]
 
     colors = ["#364e4f", "#9C3F19", "#3f6eb5", "#854187"]
 
@@ -105,7 +107,8 @@ if __name__ == "__main__":
     throughput_values = [normal_throughput, high_load_throughput]
 
     ax_height = 2.2
-    ax_width = 3.85/1.1
+    # ax_width = 3.85/1.1
+    ax_width = 1.6
     fig_width = 20
     fig_height = 20
 
@@ -220,15 +223,15 @@ if __name__ == "__main__":
     ax_exec_time.set_xticks(group_centers)
     ax_exec_time.set_xlim(-0.8, 2)
     ax_exec_time.set_xticklabels(series)
-    ax_exec_time.tick_params(axis="x", rotation=15, which='major')
+    ax_exec_time.tick_params(axis="x", rotation=20, which='major')
     ax_p999.set_xticks(group_centers)
     ax_p999.set_xlim(-0.8, 2)
     ax_p999.set_xticklabels(series)
-    ax_p999.tick_params(axis="x", rotation=15, which='major')
+    ax_p999.tick_params(axis="x", rotation=20, which='major')
     ax_throughput.set_xticks(group_centers)
     ax_throughput.set_xlim(-0.8, 2)
     ax_throughput.set_xticklabels(series)
-    ax_throughput.tick_params(axis="x", rotation=15, which='major')
+    ax_throughput.tick_params(axis="x", rotation=20, which='major')
 
     if time_norm:
         ax_exec_time.set_ylabel("Normalized exec. time", labelpad=8)
@@ -347,6 +350,6 @@ if __name__ == "__main__":
         zorder=3,
     ))
 
-    fig_exec_time.savefig(os.path.join(result_dir, "execution_time_imbalanced_260120.pdf"), bbox_inches=bbox)
-    fig_p999.savefig(os.path.join(result_dir, "p999_latency_imbalanced_260120.pdf"), bbox_inches=bbox)
-    fig_throughput.savefig(os.path.join(result_dir, "throughput_imbalanced_260120.pdf"), bbox_inches=bbox)
+    fig_exec_time.savefig(os.path.join(result_dir, "execution_time_imbalanced_260120_1.pdf"), bbox_inches=bbox)
+    fig_p999.savefig(os.path.join(result_dir, "p999_latency_imbalanced_260120_1.pdf"), bbox_inches=bbox)
+    fig_throughput.savefig(os.path.join(result_dir, "throughput_imbalanced_260120_1.pdf"), bbox_inches=bbox)

@@ -5,14 +5,20 @@ from itertools import product
 
 
 result_dir = "/data0/projects/latency"
-experiments = ["sirq_eevdf_612_curve_1_1"]
+experiments = ["sirq_breakdown_1_1"]
 saved_file_name = "latency_throughput_40"
 
-# num_apps = [1, 2, 4, 8, 12, 16, 20, 24]
-num_apps = [40]
+num_apps = [36, 40, 44, 48]
+# num_apps = [1, 2, 4, 8, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 40, 44, 48, 52]
+dim = [1]
+
+
+# num_apps = [1, 2, 4, 8, 12, 16, 20, 24, 32]
+# dim = [0]
+
+# num_apps = [48]
 flowsize = [64]
 iodepth = [1]
-dim = [1]
 pin = [1]
 permute = [1]
 hrtick = [0]
@@ -75,12 +81,12 @@ def parse_experiment(experiment_name):
 
         experiment_data[data_index, :] = [n, latency999, throughput]
         data_index += 1
-        print(f"Experiment {experiment_name}, n={n}, latency p999: {latency999}, throughput: {throughput}")
-    
+        # print(f"Experiment {experiment_name}, n={n}, latency p999: {latency999} throughput: {throughput}")
+        print(f"{n:.5f},{latency999:.5f},{throughput:.5f}")
     # Save the data to a file
-    data_file = os.path.join(result_dir, experiment_name, f"{saved_file_name}.data")
-    np.savetxt(data_file, experiment_data, delimiter=',', fmt='%.5f')
-    print(f"Saved data to {data_file}")
+    # data_file = os.path.join(result_dir, experiment_name, f"{saved_file_name}.data")
+    # np.savetxt(data_file, experiment_data, delimiter=',', fmt='%.5f')
+    # print(f"Saved data to {data_file}")
 
 
 if __name__ == "__main__":

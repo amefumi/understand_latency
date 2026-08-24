@@ -1,0 +1,1 @@
+cmd_/home/ame/latency/read_rdpmc_escaped/Module.symvers := sed 's/ko$$/o/' /home/ame/latency/read_rdpmc_escaped/modules.order | scripts/mod/modpost -m -a   -o /home/ame/latency/read_rdpmc_escaped/Module.symvers -e -i Module.symvers   -T -

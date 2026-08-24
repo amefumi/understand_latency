@@ -58,7 +58,7 @@ mpl.rcParams.update({
     "axes.labelweight": 600,
 
     # legend
-    "legend.fontsize": 12,
+    "legend.fontsize": 13,
 
 })
 
@@ -85,7 +85,7 @@ zorder = [4, 3, 5, 6, 7]
 result_dir = "/data0/projects/latency/"
 saved_file_name = "latency_throughput_cores"
 # saved_file_name = "latency_throughput_dimon"
-saved_figure_name = "latency_throughput_curve_cores_new"
+saved_figure_name = "latency_throughput_curve_cores_new_260625"
 experiments = ["combined_nirq", "combined_sirq", "combined_pcbs", "combined_autodim", ] #"combined_pcbs_new_start"]
 # experiments = ["nirq_breakdown_1_1"] #, "dirq_breakdown_1_1", "airq_breakdown_1_1"]
 # saved_file_name = "latency_throughput_dimon"
@@ -97,13 +97,13 @@ labels = ["Linux", "Linux + ACCa", "Linux + PCSched", "Linux + PCSched + AutoDIM
 
 log = False
 max_latency = 3000
-max_throughput = 0.4
+max_throughput = 0.35
 divider = 0.258
 
 # Initialize figure and axis
 # y:x = 7:4
 ax_height = 2.2
-ax_width = 3.85/1.05
+ax_width = 3.85/1.1
 fig_width = 20
 fig_height = 20
 
@@ -184,12 +184,12 @@ ax.set_xlabel('Throughput per core (million IOPS)', labelpad=8)
 ax.set_ylabel('P99.9 Latency (us)', labelpad=8)
 
 ax.set_xlim(0, max_throughput)
-ax.set_xticks(np.arange(0, max_throughput+0.05, 0.05), ["0", "0.05", "0.1", "0.15", "0.2", "0.25", "0.3", "0.35", "0.4"])
+ax.set_xticks(np.arange(0, max_throughput+0.05, 0.05), ["0", "0.05", "0.1", "0.15", "0.2", "0.25", "0.3", "0.35"])
 xticks = ax.xaxis.get_major_ticks()
 xticks[0].tick1line.set_markersize(0)
 xticks[0].tick2line.set_markersize(0)
-xticks[-1].tick1line.set_markersize(0)
-xticks[-1].tick2line.set_markersize(0)
+# xticks[-1].tick1line.set_markersize(0)
+# xticks[-1].tick2line.set_markersize(0)
 
 ax.set_ylim(0 if not log else 10, max_latency)
 ax.set_yticks(np.arange(0, max_latency+500, 1000))
